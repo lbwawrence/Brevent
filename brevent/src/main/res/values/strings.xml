@@ -4,8 +4,8 @@
     <string name="app_name">Brevent</string>
 
     <string name="fragment_guide_welcome">Welcome</string>
-    <string name="fragment_guide_welcome_message">How do you quit apps?\nPressing BACK always means that you finished your work and wanted to quit.\nPressing HOME would start the launcher and kick this app into backiground.\n\n</string>
-    <string name="fragment_guide_welcome_message2">We love this design of Android, but some apps do not. They keep them in backgroud and drain your battery, some even push useless notifications to draw your attention.\n\nAnd Brevent is going to protect your phone from these apps.\nSwiping away from Recent Panel or pressing BACK, they would be killed immediately.\nPressing HOME and they would be kept in the background to finish their tasks, but not for too long they would be killed, too.\n\nFor background apps, Brevent shows the idle time dynamically.</string>
+    <string name="fragment_guide_welcome_message">How do you quit apps?\nPressing Back always means that you finished your work and wanted to quit.\nPressing Home would start the launcher and kick this app into backiground.\n\n</string>
+    <string name="fragment_guide_welcome_message2">We love this design of Android, but some apps do not. They keep them in backgroud and drain your battery, some even push useless notifications to draw your attention.\n\nAnd Brevent is going to protect your phone from these apps.\nSwiping away from Recent Screen or pressing Back, they would be force-stopped immediately.\nPressing Home and they would be kept in the background to finish their tasks, but not for too long they would be force-stopped, too.\n\nFor background apps, Brevent shows the idle time dynamically.</string>
 
     <string name="fragment_guide_permission">Permissions</string>
     <string name="fragment_guide_permission_message">What do I need to do? \nJust a simple command, along with your PC.\n\n</string>
@@ -17,7 +17,7 @@
 
     <string name="fragment_guide_enjoy">Enjoy</string>
     <string name="fragment_guide_enjoy_message">Enjoy Brevent, and feel free to feedback.</string>
-    <string name="fragment_guide_enjoy_message2">The default Brevent method is "Standby". If you find some apps still running, please use Brevent or other tools to check its status.\n\nAnd to increase battery performance, Brevent sever delay the processe by 3 to 60 seconds according the event level.\n\nWhen you clear apps from recent tasks, Android will kill the processes and Brevent would stop them ASAP.</string>
+    <string name="fragment_guide_enjoy_message2">The default Brevent method is "App Standby"(since Android 6.0). If you find some apps still running, please use Brevent or other tools to check its status.\n\nAnd to increase battery performance, Brevent sever delay the processe by 3 to 60 seconds according the event level.\n\nWhen you clear apps from recent tasks, Android will kill the processes and Brevent would stop them ASAP.</string>
 
     <string name="fragment_guide_adb">ADB</string>
     <string name="fragment_guide_adb_message">ADB (Android Debug Bridge) is a command-line tool that lets you communicate with an Android device. It\'s part of platform-tools, you can download it from here: https://developer.android.com/studio/releases/platform-tools.html (Long press, then select and copy).</string>
@@ -157,7 +157,7 @@
     <string name="brevent_about_developer_adb">USB debugging is on</string>
     <string name="brevent_about_project">Project</string>
     <string name="brevent_about_translation">Translator</string>
-    <string name="brevent_about_translator">Thom</string>
+    <string name="brevent_about_translator">Thom, Limber</string>
     <string name="brevent_about_licenses">Licenses</string>
 
 </resources>
