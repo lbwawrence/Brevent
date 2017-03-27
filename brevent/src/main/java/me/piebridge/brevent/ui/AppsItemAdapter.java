@@ -32,7 +32,7 @@ import me.piebridge.brevent.protocol.TimeUtils;
 /**
  * Created by thom on 2017/1/25.
  */
-public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLongClickListener, View.OnClickListener {
+public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnClickListener {
 
     private static final int VIEW_TYPE_SECTION = 0;
     private static final int VIEW_TYPE_ITEM = 1;
@@ -88,7 +88,6 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
             viewHolder.statusView = (ImageView) view.findViewById(R.id.status);
             viewHolder.descriptionView = (TextView) view.findViewById(R.id.description);
             viewHolder.inactiveView = (TextView) view.findViewById(R.id.inactive);
-            view.setOnLongClickListener(this);
             view.setOnClickListener(this);
             viewHolder.iconView.setOnClickListener(this);
             if (cardColorBackgroundDefault == Color.TRANSPARENT) {
@@ -227,16 +226,6 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
         BreventActivity breventActivity = getActivity();
         if (breventActivity != null) {
             updateAppsInfo();
-        }
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        if (v instanceof CardView) {
-            onSelected((CardView) v);
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -382,10 +371,21 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
     }
 
     public boolean accept(PackageManager pm, ApplicationInfo appInfo, boolean showAllApps) {
+        BreventActivity activity = getActivity();
+        String packageName = appInfo.packageName;
         if (appInfo.uid < Process.FIRST_APPLICATION_UID) {
+            if (activity.isBrevent(packageName)) {
+                activity.unbrevent(packageName);
+            }
             return false;
         }
-        return (getActivity().isLauncher(appInfo.packageName) || mFragment.supportAllApps() || showAllApps || pm.getLaunchIntentForPackage(appInfo.packageName) != null)
+        boolean hasLaunchIntent = pm.getLaunchIntentForPackage(packageName) != null;
+        if (mFragment.isSystemPackage(appInfo.flags) && !hasLaunchIntent) {
+            if (activity.isBrevent(packageName)) {
+                activity.unbrevent(packageName);
+            }
+        }
+        return (activity.isLauncher(packageName) || mFragment.supportAllApps() || showAllApps || hasLaunchIntent)
                 && mFragment.accept(pm, appInfo);
     }
 
