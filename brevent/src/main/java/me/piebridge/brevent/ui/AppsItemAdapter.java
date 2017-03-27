@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Handler;
+import android.os.Process;
 import android.support.annotation.ColorInt;
 import android.support.v4.util.ArraySet;
 import android.support.v7.widget.CardView;
@@ -83,6 +84,7 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
             viewHolder.cardView = view;
             viewHolder.iconView = (ImageView) view.findViewById(R.id.icon);
             viewHolder.nameView = (TextView) view.findViewById(R.id.name);
+            viewHolder.syncView = (ImageView) view.findViewById(R.id.sync);
             viewHolder.statusView = (ImageView) view.findViewById(R.id.status);
             viewHolder.descriptionView = (TextView) view.findViewById(R.id.description);
             viewHolder.inactiveView = (TextView) view.findViewById(R.id.inactive);
@@ -103,9 +105,8 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
             AppsItemViewHolder viewHolder = (AppsItemViewHolder) holder;
             if (!appsInfo.packageName.equals(viewHolder.packageName)) {
                 viewHolder.packageName = appsInfo.packageName;
+                viewHolder.label = appsInfo.label;
                 viewHolder.cardView.setTag(viewHolder);
-                viewHolder.nameView.setText(appsInfo.label);
-
             }
             updateViewHolder(viewHolder);
         } else if (holder instanceof AppsSectionViewHolder) {
@@ -128,13 +129,25 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
     private void updateIcon(AppsItemViewHolder viewHolder) {
         if (mSelected.contains(viewHolder.packageName)) {
             if (mFragment.isImportant(viewHolder.packageName)) {
+                String label = mFragment.getLabel(viewHolder.label, viewHolder.packageName);
+                viewHolder.nameView.setText(label);
                 viewHolder.iconView.setImageResource(R.drawable.ic_error_black_44dp);
+            } else if (mFragment.isFavorite(viewHolder.packageName)) {
+                String label = mFragment.getLabel(viewHolder.label, viewHolder.packageName);
+                viewHolder.nameView.setText(label);
+                viewHolder.iconView.setImageResource(R.drawable.ic_favorite_black_44dp);
+            } else if (mFragment.isGcm(viewHolder.packageName)) {
+                String label = mFragment.getActivity().getString(R.string.important_gcm, viewHolder.label);
+                viewHolder.nameView.setText(label);
+                viewHolder.iconView.setImageResource(R.drawable.ic_cloud_circle_black_44dp);
             } else {
+                viewHolder.nameView.setText(viewHolder.label);
                 viewHolder.iconView.setImageResource(R.drawable.ic_check_circle_black_44dp);
             }
             viewHolder.iconView.setImageTintList(textColorPrimary);
             viewHolder.cardView.setBackgroundColor(cardColorBackgroundHighlight);
         } else {
+            viewHolder.nameView.setText(viewHolder.label);
             viewHolder.iconView.setImageTintList(null);
             new AppsIconTask().execute(getActivity().getPackageManager(), viewHolder);
             viewHolder.cardView.setBackgroundColor(cardColorBackgroundDefault);
@@ -155,7 +168,8 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
     }
 
     private void updateStatus(BreventActivity breventActivity, AppsItemViewHolder viewHolder) {
-        int statusIcon = breventActivity.getStatusIcon(viewHolder.packageName);
+        String packageName = viewHolder.packageName;
+        int statusIcon = breventActivity.getStatusIcon(packageName);
         if (viewHolder.statusIconRes != statusIcon) {
             viewHolder.statusIconRes = statusIcon;
             if (statusIcon == 0) {
@@ -164,6 +178,11 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
                 viewHolder.statusView.setVisibility(View.VISIBLE);
                 viewHolder.statusView.setImageResource(statusIcon);
             }
+        }
+        if (breventActivity.isBrevent(packageName) && breventActivity.isPriority(packageName)) {
+            viewHolder.syncView.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.syncView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -224,11 +243,7 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
     @Override
     public void onClick(View v) {
         if (v instanceof CardView) {
-            if (mSelected.isEmpty()) {
-                v.showContextMenu();
-            } else {
-                onSelected((CardView) v);
-            }
+            v.showContextMenu();
         } else if (v instanceof ImageView) {
             if (v.getId() == R.id.icon) {
                 onSelected((CardView) v.getParent().getParent());
@@ -367,7 +382,10 @@ public class AppsItemAdapter extends RecyclerView.Adapter implements View.OnLong
     }
 
     public boolean accept(PackageManager pm, ApplicationInfo appInfo, boolean showAllApps) {
-        return (getActivity().isLauncher(appInfo.packageName)  || mFragment.supportAllApps() || showAllApps || pm.getLaunchIntentForPackage(appInfo.packageName) != null)
+        if (appInfo.uid < Process.FIRST_APPLICATION_UID) {
+            return false;
+        }
+        return (getActivity().isLauncher(appInfo.packageName) || mFragment.supportAllApps() || showAllApps || pm.getLaunchIntentForPackage(appInfo.packageName) != null)
                 && mFragment.accept(pm, appInfo);
     }
 

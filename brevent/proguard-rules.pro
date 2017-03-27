@@ -25,11 +25,16 @@
 
 -keep class me.piebridge.brevent.server.BreventServer {
     public static void main(java.lang.String[]);
+    public static void startBreventServer();
 }
 
--dontnote me.piebridge.brevent.ui.util.XposedUtils
+-keep class me.piebridge.EventHandler { *; }
 
--dontwarn me.piebridge.brevent.server.HideApiOverride*
+-keep class me.piebridge.LogReader { *; }
+
+-dontnote eu.chainfire.libsuperuser.Shell*
+
+-dontwarn me.piebridge.brevent.override.HideApiOverride*
 
 -keepnames class * implements android.os.Parcelable
 

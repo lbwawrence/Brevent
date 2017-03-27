@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
     }
 }
 
@@ -17,4 +17,40 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-project.ext.abiFilters = ['armeabi', 'x86']
+def getBreventVersion = { ->
+    def tag = 'git describe --tags --always'.execute().text.trim()
+    if (tag.startsWith('v')) {
+        tag = tag.substring(1)
+    }
+    if ('git diff --no-ext-diff --quiet HEAD'.execute().waitFor() == 0) {
+        return tag
+    } else {
+        return tag + '-dirty'
+    }
+}
+
+project.ext.abiFilters = ['armeabi', 'arm64-v8a', 'x86', 'x86_64']
+
+project.ext.supportLibraryVersion = '25.3.0'
+
+project.ext.buildToolsVersion = '25.0.2'
+
+project.ext.minSdkVersion = 21
+
+project.ext.targetSdkVersion = 25
+
+project.ext.versionCode = 28
+
+project.ext.simpleVersionName = getBreventVersion()
+
+project.ext.versionName = project.ext.simpleVersionName
+
+if (rootProject.file('ant.properties').exists()) {
+    Properties properties = new Properties()
+    properties.load(new FileInputStream(rootProject.file('ant.properties')))
+    if (properties['build.codename'] != null) {
+        project.ext.versionName = properties['build.codename'] + "(" + getBreventVersion() + ")"
+    }
+}
+
+project.ext.hiddenApi = files(project(':hidden-api').file('build/intermediates/bundles/default/classes.jar'))

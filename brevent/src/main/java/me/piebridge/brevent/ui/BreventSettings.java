@@ -24,8 +24,6 @@ import me.piebridge.donation.DonateActivity;
  */
 public class BreventSettings extends DonateActivity implements View.OnClickListener {
 
-    private boolean mPlay;
-
     private BreventConfiguration mConfiguration;
 
     private SettingsFragment settingsFragment;
@@ -42,10 +40,11 @@ public class BreventSettings extends DonateActivity implements View.OnClickListe
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mPlay = isPlay();
-
         settingsFragment = new SettingsFragment();
-        settingsFragment.getArguments().putBoolean(SettingsFragment.SHOW_DONATION, !mPlay);
+        Bundle arguments = settingsFragment.getArguments();
+        arguments.putAll(getIntent().getExtras());
+        arguments.putBoolean(SettingsFragment.HAS_PLAY, hasPlay());
+        arguments.putBoolean(SettingsFragment.IS_PLAY, isPlay());
 
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
@@ -78,12 +77,7 @@ public class BreventSettings extends DonateActivity implements View.OnClickListe
 
     @Override
     protected boolean acceptDonation() {
-        if (BuildConfig.RELEASE) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            return preferences.getBoolean(SettingsFragment.SHOW_DONATION, !mPlay);
-        } else {
-            return false;
-        }
+        return BuildConfig.RELEASE;
     }
 
     @Override
@@ -108,25 +102,33 @@ public class BreventSettings extends DonateActivity implements View.OnClickListe
 
     @Override
     public void showPlay(Collection<String> purchased) {
-        if (purchased != null && !purchased.isEmpty()) {
+        if (purchased == null) {
+            settingsFragment.updatePlayDonation(-1, -1, false);
+        } else {
             updatePlayDonation(purchased);
         }
         super.showPlay(purchased);
     }
 
     private void updatePlayDonation(Collection<String> purchased) {
-        int count = purchased.size();
+        int count = 0;
         int total = 0;
+        boolean contributor = false;
         for (String p : purchased) {
-            int i = p.indexOf('_');
-            if (i > 0) {
-                String t = p.substring(i + 1);
-                if (t.length() > 0 && TextUtils.isDigitsOnly(t)) {
-                    total += Integer.parseInt(t);
+            if (p.startsWith("contributor_")) {
+                contributor = true;
+            } else {
+                count++;
+                int i = p.indexOf('_');
+                if (i > 0) {
+                    String t = p.substring(i + 1);
+                    if (t.length() > 0 && TextUtils.isDigitsOnly(t)) {
+                        total += Integer.parseInt(t);
+                    }
                 }
             }
         }
-        settingsFragment.updatePlayDonation(count, total);
+        settingsFragment.updatePlayDonation(count, total, contributor);
     }
 
 }

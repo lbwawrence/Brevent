@@ -24,11 +24,14 @@ import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.preference.PreferenceManager;
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.provider.DocumentFile;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,17 +53,19 @@ import java.util.List;
  */
 public abstract class DonateActivity extends Activity implements View.OnClickListener {
 
-    private static final String PACKAGE_ALIPAY = "com.eg.android.AlipayGphone";
+    public static final String PACKAGE_ALIPAY = "com.eg.android.AlipayGphone";
 
-    static final String PACKAGE_WECHAT = "com.tencent.mm";
+    public static final String PACKAGE_WECHAT = "com.tencent.mm";
 
-    private static final String PACKAGE_PAYPAL = "com.paypal.android.p2pmobile";
+    public static final String PACKAGE_PAYPAL = "com.paypal.android.p2pmobile";
 
-    private static final String PACKAGE_PLAY = "com.android.vending";
+    public static final String PACKAGE_PLAY = "com.android.vending";
 
     private static final int REQUEST_WECHAT_DONATE_SDA = 0x4121;
 
     private static final int REQUEST_PLAY_DONATE = 0x4122;
+
+    private static final int PERMISSION_WECHAT_DONATE = 0x4123;
 
     private static final String KEY_WECHAT_DONATE_SDA = "donation.wechat.sda";
     private static final String KEY_WECHAT_DONATE_URI = "donation.wechat.uri";
@@ -85,6 +91,8 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
 
     private boolean stopped;
 
+    private volatile boolean mShowDonation = true;
+
     @CallSuper
     public void onStart() {
         super.onStart();
@@ -107,12 +115,21 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
                 activateDonations();
             }
         } else {
-            mDonation.setVisibility(View.GONE);
+            showDonation(false);
         }
     }
 
+    public final void showDonation(boolean showDonation) {
+        mShowDonation = showDonation;
+        showDonation();
+    }
+
+    void showDonation() {
+        mDonation.setVisibility(mShowDonation ? View.VISIBLE : View.GONE);
+    }
+
     private void activatePlay() {
-        if (getPackageManager().getLaunchIntentForPackage(PACKAGE_PLAY) != null) {
+        if (hasPlay()) {
             HandlerThread thread = new HandlerThread("DonateService");
             thread.start();
             activateConnection = new PlayServiceConnection(PlayServiceConnection.MESSAGE_ACTIVATE, thread.getLooper(), this);
@@ -200,7 +217,7 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
     }
 
     private boolean mayHasPermission(String permission) {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N || hasPermission(permission);
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M || hasPermission(permission);
     }
 
     private boolean hasPermission(String permission) {
@@ -210,7 +227,7 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
     @Override
     @CallSuper
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_WECHAT_DONATE_SDA) {
+        if (requestCode == REQUEST_WECHAT_DONATE_SDA && data != null) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri uri = data.getData();
                 getContentResolver().takePersistableUriPermission(uri,
@@ -221,7 +238,7 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
             } else {
                 hideWechat();
             }
-        } else if (requestCode == REQUEST_PLAY_DONATE) {
+        } else if (requestCode == REQUEST_PLAY_DONATE && data != null) {
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
             String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
             if (PlayServiceConnection.verify(getPlayModulus(), purchaseData, dataSignature)) {
@@ -229,6 +246,19 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
+    @CallSuper
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (PERMISSION_WECHAT_DONATE == requestCode) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                donateViaWechat();
+            } else {
+                Toast.makeText(this, R.string.donation_wechat_permission, Toast.LENGTH_LONG).show();
+                hideWechat();
+            }
         }
     }
 
@@ -306,13 +336,10 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
         }
         if (items.isEmpty()) {
             mDonationTip.setText(canSupportWechat ? R.string.donation_unsupported_wechat : R.string.donation_unsupported);
-            mDonation.setVisibility(View.VISIBLE);
+            mDonation.setVisibility(mShowDonation ? View.VISIBLE : View.GONE);
         } else {
             mDonationTip.setText(R.string.donation);
-            Donation donation = new Donation();
-            donation.donation = mDonation;
-            donation.items = items;
-            new DonateTask(this, false, donation).execute();
+            new DonateTask(this, false).execute(items.toArray(new DonateItem[items.size()]));
         }
     }
 
@@ -341,10 +368,12 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
         return true;
     }
 
+    protected boolean hasPlay() {
+        return getPackageManager().getLaunchIntentForPackage(PACKAGE_PLAY) != null;
+    }
+
     protected boolean isPlay() {
-        PackageManager packageManager = getPackageManager();
-        return packageManager.getLaunchIntentForPackage(PACKAGE_PLAY) != null
-                && PACKAGE_PLAY.equals(packageManager.getInstallerPackageName(getPackageName()));
+        return hasPlay() && PACKAGE_PLAY.equals(getPackageManager().getInstallerPackageName(getPackageName()));
     }
 
     private Uri getQrCodeUri() {
@@ -377,6 +406,9 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
                 return null;
             }
             return Uri.fromFile(new File(dir, name));
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(this, new String[] {WECHAT_DONATE_PERMISSION}, PERMISSION_WECHAT_DONATE);
+            return Uri.EMPTY;
         } else {
             return null;
         }
@@ -434,29 +466,25 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
 
     @CallSuper
     public void showPlay(Collection<String> purchased) {
-        if (purchased != null && canDonatePlay(purchased)) {
+        if (purchased == null) {
+            activateDonations();
+        } else if (canDonatePlay(purchased)) {
             Collection<DonateItem> items = new ArrayList<>(0x1);
             checkPackage(items, R.id.play, PACKAGE_PLAY);
             if (!items.isEmpty()) {
                 mDonationTip.setText(R.string.donation);
-                Donation donation = new Donation();
-                donation.donation = mDonation;
-                donation.items = items;
-                new DonateTask(this, true, donation).execute();
+                new DonateTask(this, true).execute(items.toArray(new DonateItem[items.size()]));
             }
         }
     }
 
-    /**
-     * default implementation: ["donation_%02d", ], max 20
-     */
     protected List<String> getPlaySkus() {
         List<String> skus = new ArrayList<>(IAB_MAX_DONATE);
-        for (int i = 1; i <= IAB_MAX_DONATE; ++i) {
-            if (i < 10) {
-                skus.add("donation_0" + i);
-            } else {
-                skus.add("donation_" + i);
+        for (int i = 1; i <= 0x3; ++i) {
+            int max = i == 1 ? 10 : 5;
+            for (int j = 0; j < max; ++j) {
+                char a = (char) ('a' + j);
+                skus.add("donation" + i + a + "_" + i);
             }
         }
         return skus;
@@ -497,9 +525,8 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
     }
 
     public String getSku() {
-        int size = Math.min(0x5, mSkus.size());
-        List<String> skus = mSkus.subList(0, size);
-        Collections.shuffle(skus);
+        List<String> skus = new ArrayList<>(mSkus);
+        Collections.shuffle(skus, new SecureRandom());
         return skus.get(0);
     }
 
@@ -508,11 +535,6 @@ public abstract class DonateActivity extends Activity implements View.OnClickLis
         Drawable icon;
         CharSequence label;
         TextView textView;
-    }
-
-    static class Donation {
-        View donation;
-        Collection<DonateItem> items;
     }
 
 }

@@ -1,5 +1,6 @@
 package me.piebridge.brevent.ui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -7,28 +8,37 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemProperties;
+import android.preference.PreferenceManager;
+import android.view.KeyEvent;
+import android.widget.Toast;
 
 import java.io.File;
 
 import me.piebridge.brevent.BuildConfig;
 import me.piebridge.brevent.R;
+import me.piebridge.brevent.protocol.BreventConfiguration;
+import me.piebridge.brevent.override.HideApiOverride;
 
 
 /**
  * Created by thom on 2017/2/5.
  */
-public class AppsDisabledFragment extends DialogFragment implements DialogInterface.OnClickListener {
+public class AppsDisabledFragment extends DialogFragment implements DialogInterface.OnClickListener, DialogInterface.OnKeyListener {
 
     private static final String MESSAGE = "message";
 
     private static final int DEFAULT_MESSAGE = R.string.brevent_service_start;
 
     private Dialog mDialog;
+
+    private int repeat;
 
     public AppsDisabledFragment() {
         setArguments(new Bundle());
@@ -48,6 +58,10 @@ public class AppsDisabledFragment extends DialogFragment implements DialogInterf
         return mDialog;
     }
 
+    private boolean isEmulator() {
+        return SystemProperties.get("ro.kernel.qemu", Build.UNKNOWN).equals("1");
+    }
+
     private Dialog createDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setIcon(R.mipmap.ic_launcher);
@@ -55,11 +69,24 @@ public class AppsDisabledFragment extends DialogFragment implements DialogInterf
         builder.setTitle(arguments.getInt(MESSAGE, DEFAULT_MESSAGE));
         String commandLine = getBootstrapCommandLine();
         boolean adbRunning = SystemProperties.get("init.svc.adbd", Build.UNKNOWN).equals("running");
-        String status = adbRunning ? getString(R.string.brevent_service_adb_running) : "";
-        builder.setMessage(getString(R.string.brevent_service_guide, status, commandLine));
-        ((BreventActivity) getActivity()).copy(commandLine);
-        if (!adbRunning) {
-            builder.setPositiveButton(R.string.brevent_service_open_development, this);
+        String adbStatus = adbRunning ? getString(R.string.brevent_service_adb_running) : "";
+        IntentFilter filter = new IntentFilter(HideApiOverride.ACTION_USB_STATE);
+        Intent intent = getActivity().registerReceiver(null, filter);
+        boolean connected = intent != null && intent.getBooleanExtra(HideApiOverride.USB_CONNECTED, false);
+        String usbStatus = connected ? getString(R.string.brevent_service_usb_connected) : "";
+        builder.setMessage(getString(R.string.brevent_service_guide, adbStatus, usbStatus, commandLine));
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        boolean allowRoot = preferences.getBoolean(BreventConfiguration.BREVENT_ALLOW_ROOT, false);
+        builder.setNeutralButton(R.string.menu_guide, this);
+        if (allowRoot) {
+            builder.setNegativeButton(R.string.brevent_service_run_as_root, this);
+        } else {
+            if (adbRunning) {
+                builder.setPositiveButton(R.string.brevent_service_copy_path, this);
+            } else {
+                builder.setPositiveButton(R.string.brevent_service_open_development, this);
+            }
+            builder.setOnKeyListener(this);
         }
         return builder.create();
     }
@@ -79,7 +106,7 @@ public class AppsDisabledFragment extends DialogFragment implements DialogInterf
     }
 
     private String getBootstrapCommandLine() {
-        String name = "libbootstrap.so";
+        String name = "libbrevent.so";
         try {
             PackageManager packageManager = getActivity().getPackageManager();
             ApplicationInfo applicationInfo = packageManager.getApplicationInfo(BuildConfig.APPLICATION_ID, 0);
@@ -87,7 +114,7 @@ public class AppsDisabledFragment extends DialogFragment implements DialogInterf
             if (file.exists()) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("adb ");
-                if (SystemProperties.get("ro.kernel.qemu", Build.UNKNOWN).equals("1")) {
+                if (isEmulator()) {
                     sb.append("-e ");
                 } else {
                     sb.append("-d ");
@@ -103,23 +130,43 @@ public class AppsDisabledFragment extends DialogFragment implements DialogInterf
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
-        getActivity().finish();
+    public void onClick(DialogInterface dialog, int which) {
+        Activity activity = getActivity();
+        if (which == DialogInterface.BUTTON_POSITIVE) {
+            boolean adbRunning = SystemProperties.get("init.svc.adbd", Build.UNKNOWN).equals("running");
+            if (adbRunning) {
+                String commandLine = getBootstrapCommandLine();
+                ((BreventActivity) activity).copy(commandLine);
+                String message = getString(R.string.brevent_service_command_copied, commandLine);
+                Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+            } else {
+                Intent intent = new Intent();
+                intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DevelopmentSettings"));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                try {
+                    startActivity(intent);
+                } catch (ActivityNotFoundException e) {
+                    UILog.d("Can't find settings", e);
+                }
+            }
+            ((BreventActivity) activity).showDisabled();
+        } else if (which == DialogInterface.BUTTON_NEUTRAL) {
+            ((BreventActivity) activity).openGuide();
+            dismiss();
+        } else if (which == DialogInterface.BUTTON_NEGATIVE) {
+            ((BreventActivity) activity).runAsRoot();
+            dismiss();
+        }
     }
 
     @Override
-    public void onClick(DialogInterface dialog, int which) {
-        if (which == DialogInterface.BUTTON_POSITIVE) {
-            Intent intent = new Intent();
-            intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DevelopmentSettings"));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            try {
-                startActivity(intent);
-            } catch (ActivityNotFoundException e) {
-                UILog.d("Can't find settings", e);
-            }
+    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN && ++repeat == 0x7) {
+            PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
+                    .putBoolean(BreventConfiguration.BREVENT_ALLOW_ROOT, true).apply();
+            ((BreventActivity) getActivity()).showDisabled(getArguments().getInt(MESSAGE, DEFAULT_MESSAGE));
         }
-        getActivity().finish();
+        return false;
     }
 
 }

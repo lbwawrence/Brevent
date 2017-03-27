@@ -7,6 +7,7 @@ import java.lang.ref.WeakReference;
 
 import me.piebridge.brevent.R;
 import me.piebridge.brevent.protocol.BreventPackages;
+import me.piebridge.brevent.protocol.BreventPriority;
 
 /**
  * Created by thom on 2017/2/3.
@@ -29,8 +30,9 @@ public class AppsActivityUIHandler extends Handler {
                     activity.showProgress(R.string.process_retrieving);
                     break;
                 case BreventActivity.UI_MESSAGE_HIDE_PROGRESS:
-                    activity.hideDisabled();
                     activity.hideProgress();
+                case BreventActivity.UI_MESSAGE_HIDE_DISABLED:
+                    activity.hideDisabled();
                     break;
                 case BreventActivity.UI_MESSAGE_SHOW_PAGER:
                     activity.showViewPager();
@@ -51,6 +53,11 @@ public class AppsActivityUIHandler extends Handler {
                     break;
                 case BreventActivity.UI_MESSAGE_UPDATE_BREVENT:
                     activity.updateBreventResponse((BreventPackages) message.obj);
+                    break;
+                case BreventActivity.UI_MESSAGE_UPDATE_PRIORITY:
+                    activity.updateBreventResponse((BreventPriority) message.obj);
+                    break;
+                default:
                     break;
             }
         }

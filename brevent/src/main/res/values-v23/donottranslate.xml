@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="default_brevent_method" translatable="false">standby_forcestop</string>
+
+</resources>

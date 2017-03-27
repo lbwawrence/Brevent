@@ -23,7 +23,7 @@ import java.util.List;
 
 import me.piebridge.brevent.BuildConfig;
 import me.piebridge.brevent.R;
-import me.piebridge.brevent.server.HideApiOverrideM;
+import me.piebridge.brevent.override.HideApiOverrideM;
 
 /**
  * Created by thom on 2017/1/25.
@@ -187,14 +187,14 @@ public abstract class AppsFragment extends Fragment {
             return packageManager.checkSignatures(PACKAGE_FRAMEWORK, packageName) == PackageManager.SIGNATURE_MATCH;
         } else {
             SharedPreferences preferences = null;
-            Context context = getContext();
+            Context context = getActivity();
             if (context != null) {
                 preferences = context.getSharedPreferences("signature", Context.MODE_PRIVATE);
                 if (preferences.contains(packageName)) {
                     return preferences.getBoolean(packageName, false);
                 }
             }
-            boolean signature =  Arrays.equals(getFrameworkSignatures(packageManager), getSignatures(packageManager, packageName));
+            boolean signature = Arrays.equals(getFrameworkSignatures(packageManager), getSignatures(packageManager, packageName));
             if (preferences != null) {
                 preferences.edit().putBoolean(packageName, signature).apply();
             }
@@ -242,11 +242,19 @@ public abstract class AppsFragment extends Fragment {
     }
 
     public final boolean isImportant(String packageName) {
-        return isAllImportant() || ((BreventActivity) getActivity()).isImportant(packageName);
+        return ((BreventActivity) getActivity()).isImportant(packageName);
     }
 
-    public boolean isAllImportant() {
-        return false;
+    public final boolean isGcm(String packageName) {
+        return ((BreventActivity) getActivity()).isGcm(packageName);
+    }
+
+    public final boolean isFavorite(String packageName) {
+        return ((BreventActivity) getActivity()).isFavorite(packageName);
+    }
+
+    public final String getLabel(String label, String packageName) {
+        return ((BreventActivity) getActivity()).getLabel(label, packageName);
     }
 
 }

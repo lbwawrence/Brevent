@@ -17,27 +17,25 @@ import java.lang.ref.WeakReference;
  * <p>
  * Created by thom on 2017/2/13.
  */
-class DonateTask extends AsyncTask<Void, DonateActivity.DonateItem, Void> {
+class DonateTask extends AsyncTask<DonateActivity.DonateItem, DonateActivity.DonateItem, Void> {
 
     private final WeakReference<Context> mReference;
-    private final DonateActivity.Donation mDonation;
 
     private final boolean mUnbindService;
 
-    DonateTask(Context context, boolean unbindService, DonateActivity.Donation donation) {
+    DonateTask(Context context, boolean unbindService) {
         mReference = new WeakReference<>(context);
-        mDonation = donation;
         mUnbindService = unbindService;
     }
 
     @Override
-    protected Void doInBackground(Void... params) {
+    protected Void doInBackground(DonateActivity.DonateItem... params) {
         Context context = mReference.get();
         if (context != null) {
             Resources resources = context.getResources();
             PackageManager packageManager = context.getPackageManager();
             int size = resources.getDimensionPixelSize(android.R.dimen.app_icon_size);
-            for (DonateActivity.DonateItem item : mDonation.items) {
+            for (DonateActivity.DonateItem item : params) {
                 ActivityInfo activityInfo = packageManager.resolveActivity(item.intent, 0).activityInfo;
                 item.label = activityInfo.loadLabel(packageManager);
                 item.icon = DonateActivity.cropDrawable(resources, (BitmapDrawable) activityInfo.loadIcon(packageManager), size);
@@ -64,7 +62,7 @@ class DonateTask extends AsyncTask<Void, DonateActivity.DonateItem, Void> {
     protected void onPostExecute(Void params) {
         Context context = mReference.get();
         if (context != null) {
-            mDonation.donation.setVisibility(View.VISIBLE);
+            ((DonateActivity) context).showDonation();
             if (mUnbindService) {
                 ((DonateActivity) context).unbindService();
             }

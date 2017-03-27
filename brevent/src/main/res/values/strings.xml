@@ -3,36 +3,45 @@
 
     <string name="app_name">Brevent</string>
 
-    <string name="fragment_guide_welcome">Welcome to Brevent</string>
-    <string name="fragment_guide_welcome_message">Android offer two keys to leave apps, BACK for finish and return previous app, HOME for move background and open Launcher; and Android allow some apps to use service, which keeps running. Of course, you can swipe away from recent tasks list anytime.\n\nBrevent distinguish whether apps were started or finished, then brevent not-in-use apps from running long time. And force stop apps awaken by other apps.</string>
-    <string name="fragment_guide_welcome_message2">Brevent love Android\'s design. When BACK to finish apps, apps and service won\'t be running; when HOME to background apps, apps and service can keep running in some time (You can modify in Brevent\'s Settings); when swipe from recent tasks list, apps are not needed anymore. Brevent shows running time for the apps are not finished.</string>
+    <string name="fragment_guide_welcome">Welcome</string>
+    <string name="fragment_guide_welcome_message">How do you quit apps?\nPressing Back always means that you finished your work and wanted to quit.\nPressing Home would start the launcher and kick this app into background.</string>
+    <string name="fragment_guide_welcome_message2">We love this design of Android, but some apps do not. They keep them in backgroud and drain your battery, some even push useless notifications to draw your attention.\n\nAnd Brevent is going to protect your phone from these apps.\nSwiping away from Recent Screen or pressing Back, they would be force-stopped.\nPressing Home and they would be kept in the background to finish their tasks, once the time period you set is out they would be force-stopped.\n\nFor background apps, Brevent shows the idle time dynamically.</string>
 
-    <string name="fragment_guide_permission">Brevent permissions</string>
-    <string name="fragment_guide_permission_message">When you turn on the device, Brevent requires you to run a command in debugging mode to acquire required permissions.</string>
-    <string name="fragment_guide_permission_message2">"Some similar apps require ROOT or modify unlocked devices. The debugging mode doesn't require ROOT, nor unlock, it's safe to use. "</string>
+    <string name="fragment_guide_permission">Permissions</string>
+    <string name="fragment_guide_permission_message">What do you need to do? \nJust a simple command, along with your PC.</string>
+    <string name="fragment_guide_permission_message2">Some similar apps require root access or modifying your unlocked device. Debugging mode doesn\'t require root access, nor unlocking, it\'s much safer to use. \n\nThere is an experimental ROOT feature, allowing you to skip turning on debugging mode, even starting Brevent service when completed booting. You can press Back 7 times on "Please start Brevent service" page, or press "Version" 7 times in "Settings". ROOT mode is unsafe and unnessary, we do not offer support for those who prefer ROOT mode.</string>
 
-    <string name="fragment_guide_security">Brevent Security</string>
-    <string name="fragment_guide_security_message">Brevent requires Brevent server to be launched in debugging mode. However, debugging mode is not safe, it\'s recommended to turn off after Brevent server is running.</string>
-    <string name="fragment_guide_security_message2">Brevent use many Android\'s hide API. Some third-party ROM may modify these API, so there are possible risks to use Brevent.</string>
+    <string name="fragment_guide_security">Security</string>
+    <string name="fragment_guide_security_message">We need debugging mode to launch our Brevent without rooting your device. However, debugging mode is not safe enough, we strongly recommend you turn it off after starting Brevent service successfully.</string>
+    <string name="fragment_guide_security_message2">Brevent uses plenty of Android\'s hidden APIs. Some third-party ROMs may modify these API, so there would be some issues when using.</string>
 
-    <string name="fragment_guide_enjoy">Start Brevent</string>
+    <string name="fragment_guide_enjoy">Enjoy</string>
     <string name="fragment_guide_enjoy_message">Enjoy Brevent, and feel free to feedback.</string>
-    <string name="fragment_guide_enjoy_message2">The default Brevent method is Standby. If you find some apps still running, please use Brevent or other tools to check whether it\'s Standby.\n\nAnd to reduce self battery usage, Brevent sever delay the processes by 3 to 60 seconds according the event level.\n\nWhen you clear apps from recent tasks, Android will kill the processes, and Brevent will force-stop them.</string>
+    <string name="fragment_guide_enjoy_message2">The default Brevent method is \"App Standby\"(since Android 6.0). If you find some apps still running, please use Brevent or other tools to check its status.\n\nAnd to increase battery performance, Brevent server delay the processes by 3 to 60 seconds according the event level.\n\nWhen you swipe apps away from recent screen, Android will kill the processes and Brevent would force-stop them ASAP.</string>
+
+    <string name="fragment_guide_adb">ADB</string>
+    <string name="fragment_guide_adb_message">ADB (Android Debug Bridge) is a command-line tool that lets you communicate with an Android device. It\'s part of platform-tools, you can download it from here: https://developer.android.com/studio/releases/platform-tools.html (Long press, then select and copy).</string>
+    <string name="fragment_guide_adb_message2">1. uncompress platform-tools-latest-&lt;platform&gt;.zip\n\n2. navigate to platform-tools directory\n\n3. (for Windows) Hold Shift key, then right-click, choose \"Open command window here\", you can run \"adb\" now\n\n3. (for Mac OS X) Navigate \"Finder\", \"Applications\", \"Utilities\", open \"Terminal\", then drag \"adb\" into the \"Terminal\" (please remove duplicate \"adb\" when paste the command line)</string>
 
     <string name="start_brevent">Start Brevent</string>
 
     <string name="brevent_service_start">Please start Brevent service</string>
     <string name="brevent_service_restart">Please restart Brevent Service</string>
-    <string name="brevent_service_guide">1. Turn on \"Developer options\", enable \"USB debugging\" %1$s\n\n2. Connect to PC via USB\n\n3. Execute in PC\'s command line: %2$s (Copied to clipboard)\n</string>
-    <string name="brevent_service_open_development">Open \"Developer options\"</string>
+    <string name="brevent_service_guide">1. Turn on \"Developer options\", enable \"USB debugging\" %1$s\n\n2. Connect to PC via USB %2$s\n\n3. Execute in PC\'s command line \"adb devices\", make sure PC can find device (Reader \"Guide - ADB\")\n\n4. Execute in PC\'s command line \"%3$s\"</string>
+    <string name="brevent_service_open_development">Developer options</string>
+    <string name="brevent_service_copy_path">Copy command</string>
+    <string name="brevent_service_command_copied">Command copied: %s</string>
     <string name="brevent_service_adb_running">(Enabled)</string>
+    <string name="brevent_service_usb_connected">(USB connected)</string>
+    <string name="brevent_service_run_as_root">Run as ROOT</string>
+    <string name="brevent_service_success">Brevent service started successfully. Please click app icons to choose them, and brevent them</string>
 
     <string name="fragment_apps_user">User Apps</string>
     <string name="fragment_apps_system">System Apps</string>
     <string name="fragment_apps_framework">Framework Apps</string>
 
-    <string name="process_retrieving">Retrieving processes status, please wait. . .</string>
-    <string name="process_retrieving_apps">Retrieving apps, please wait. . .</string>
+    <string name="process_retrieving">Retrieving processes status, just a moment. . .</string>
+    <string name="process_retrieving_apps">Retrieving apps, just a moment. . .</string>
 
     <string name="process_status_running">Running</string>
     <string name="process_status_standby">Standby</string>
@@ -65,6 +74,8 @@
     <string name="context_menu_app_info">Application Info</string>
     <string name="context_menu_open">Open</string>
     <string name="context_menu_brevent_server_info">Brevent server Info</string>
+    <string name="context_menu_set_priority">Allow sync</string>
+    <string name="context_menu_unset_priority">Disallow sync</string>
     <string name="context_menu_snackbar_copied">Copied package name: %s</string>
 
     <!-- menu -->
@@ -74,44 +85,79 @@
 
     <!-- settings brevent list -->
     <string name="brevent_list">Brevent List</string>
-    <string name="brevent_auto">Auto Brevent</string>
+    <string name="brevent_auto">Auto brevent</string>
     <string name="brevent_auto_label">Update Brevent list when apps installed or uninstalled</string>
-    <string name="brevent_move_back">Brevent BACK move background</string>
-    <string name="brevent_move_back_label">Some apps move to background when BACK is pressed. When on, Brevent process it like normal BACK (Available since Android 7.0)</string>
-    <string name="brevent_back_home">Brevent BACK open Launcher</string>
-    <string name="brevent_back_home_label">Some apps open Launcher when BACK is pressed. When on, Brevent process it like normal BACK. Brevent could distinguish in most case, however you can press HOME 7 times to help Brevent confirm</string>
+    <string name="brevent_method">Brevent method</string>
+    <string name="brevent_method_standby_forcestop">Standby, then force-stop</string>
+    <string name="brevent_method_standby_only">Only Standby, no force-stop</string>
+    <string name="brevent_method_forcestop_only">Only force-stop, no Standby</string>
+    <string name="brevent_method_standby_forcestop_label">Standby when you exit apps (by pressing \"Back\"), or background apps timed out; force-stop when reach standby time out or clear them from Recent Tasks list\n\nAlways force-stop awaken apps have no activity</string>
+    <string name="brevent_method_standby_only_label">Standby when you exit apps (by pressing \"Back\"), or background apps timed out\n\nAlways force-stop awaken apps have no activity</string>
+    <string name="brevent_method_forcestop_only_label">Force-Stop when you exit apps (by pressing \"Back\"), or background apps timed out, or clear apps from Recent Task list\n\nBrevent always force-stop awaken apps have no activity</string>
     <string name="brevent_timeout">Background apps timeout</string>
-    <string name="brevent_timeout_label">Background apps will be brevented after %s. Brevent show inactive time for background apps dynamically</string>
-    <string name="brevent_timeout_label_never">Background apps won\'t be brevented. Brevent show inactive time for background apps dynamically</string>
-    <string name="brevent_timeout_never">Never</string>
+    <string name="brevent_timeout_label">Background apps will be brevented after %s\n\nBrevent shows inactive time for background apps dynamically</string>
+    <string name="brevent_timeout_1min">1 minute</string>
     <string name="brevent_timeout_5min">5 minutes</string>
     <string name="brevent_timeout_10min">10 minutes</string>
     <string name="brevent_timeout_15min">15 minutes</string>
     <string name="brevent_timeout_30min">30 minutes</string>
     <string name="brevent_timeout_1hour">1 hour</string>
-    <string name="brevent_appops_background">Use AppOps\'s BACKGROUND</string>
-    <string name="brevent_appops_background_label">Recommend OFF. Sync and Alarms won\'t be available, apply even when you uninstall Brevent (Since Android 7.0)</string>
-    <string name="brevent_method">Brevent method</string>
-    <string name="brevent_method_standby">Prefer Standby (unavailable when charging), then ForceStop</string>
-    <string name="brevent_mode">Brevent working mode</string>
-    <string name="brevent_mode_later">Later (Recommend)</string>
-    <string name="brevent_mode_immediate">Immediate</string>
-    <string name="brevent_mode_label_later">Later. Short when HOME focused, longer when awaken, longest when apps focused, immediately when screen off</string>
-    <string name="brevent_mode_label_immediate">Immediate. Whenever apps / HOME focused, screen off, awaken by other apps. Be careful, Brevent server will consume more battery, other apps may not work well</string>
+    <string name="brevent_timeout_2hour">2 hours</string>
+    <string name="brevent_timeout_3hour">3 hours</string>
+    <string name="brevent_timeout_6hour">6 hours</string>
+    <string name="brevent_timeout_999999">11.5 days</string>
+    <string name="brevent_standby_timeout">Standby timeout</string>
+    <string name="brevent_standby_timeout_label">Force-stop when apps have standby for %1$s</string>
 
     <!-- settings user interface -->
     <string name="brevent_ui">User interface</string>
     <string name="show_donation">Show donation</string>
-    <string name="show_donation_play_one">Thanks for donation %d USD in Play Store</string>
-    <string name="show_donation_play_multi" tools:ignore="PluralsCandidate">Thanks for donation %1$d times total %2$d USD in Play Store</string>
+    <string name="show_donation_play_one">Thanks for donating %d USD in Play Store</string>
+    <string name="show_donation_play_one_and_contributor">Thanks for donating %d USD in Play Store, and priceless contribution on Brevent</string>
+    <string name="show_donation_play_multi" tools:ignore="PluralsCandidate">Thanks for donating %1$d times total %2$d USD in Play Store</string>
+    <string name="show_donation_play_multi_and_contributor" tools:ignore="PluralsCandidate">Thanks for donating %1$d times total %2$d USD in Play Store, and priceless contribution on Brevent</string>
+    <string name="show_donation_contributor">Thanks for priceless contribution on Brevent</string>
     <string name="show_all_apps">Show all apps</string>
-    <string name="show_all_apps_label">Include system and framework apps cannot be open</string>
+    <string name="show_all_apps_label">Including system and framework apps cannot be open\n\nBe careful when breventing system and framework apps</string>
     <string name="show_framework_apps">Show framework apps</string>
-    <string name="show_framework_apps_label">All apps have the same signature with framework</string>
+    <string name="show_framework_apps_label">All apps have the same signature with framework\n\nBe careful when breventing system and framework apps</string>
 
-    <string name="feedback_message">Thanks for feedback.\n\nIf you have a GitHub account, please create an issue; you can view opened issues too.%s</string>
-    <string name="feedback_message_email">\n\nFor private messages, please drop an Email to me.</string>
+    <string name="feedback_message">Feel free to feedback.\n\nIf you have a GitHub account, please create an issue; you can view opened issues too.%s</string>
+    <string name="feedback_message_email">\n\nFor private messages, mail me.</string>
     <string name="feedback_github">GitHub</string>
     <string name="feedback_email">Email</string>
+
+    <string name="important_input">%s (Input method)</string>
+    <string name="important_alarm">%s (Alarm app)</string>
+    <string name="important_sms">%s (SMS app)</string>
+    <string name="important_home">%s (Home app)</string>
+    <string name="important_persistent">%s (Persistent)</string>
+    <string name="important_android">%s (Android)</string>
+    <string name="important_dialer">%s (Phone app)</string>
+    <string name="important_assistant">%s (Assist app)</string>
+    <string name="important_webview">%s (WebView)</string>
+    <string name="important_tile">%s (Quick Settings)</string>
+    <string name="important_accessibility">%s (Accessibility)</string>
+    <string name="important_device_admin">%s (Device admin)</string>
+    <string name="important_gcm">%s (FCM)</string>
+    <string name="important_battery">%s (no Standby, Battery not optimized)</string>
+    <string name="important_trust_agent">%s (Trust agent)</string>
+
+    <string name="brevent_advanced">Advanced Features</string>
+    <string name="brevent_optimize_priority">Allow sync</string>
+    <string name="brevent_optimize_priority_label">Brevent won\'t force-stop \"Allow Sync\" apps if they pushed notification or running in background\n\nRecommend donate total 1 USD</string>
+    <string name="brevent_allow_gcm">Allow FCM (previous GCM)</string>
+    <string name="brevent_allow_gcm_label">When checked, allow brevented \"Allow Sync\" apps to receive FCM message\n\nRequires donate total 2 USD for Play version, feel free to donate for other version</string>
+    <string name="brevent_allow_root">Run as ROOT</string>
+    <string name="brevent_allow_root_label">When checked, allow ROOT to start Brevent service without "USB Debugging"\n\Requires donate total 3 USD for Play version, feel free to donate for other version</string>
+
+    <string name="brevent_about">About</string>
+    <string name="brevent_about_version">Version</string>
+    <string name="brevent_about_developer">Developer Options</string>
+    <string name="brevent_about_developer_adb">USB debugging is on</string>
+    <string name="brevent_about_project">Project</string>
+    <string name="brevent_about_translation">Translator</string>
+    <string name="brevent_about_translator">Thom, DKOUT</string>
+    <string name="brevent_about_licenses">Licenses</string>
 
 </resources>

@@ -1,6 +1,5 @@
 package me.piebridge.brevent.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -28,9 +27,11 @@ public class AppsItemViewHolder extends RecyclerView.ViewHolder implements View.
     private static final String PACKAGE_SHELL = "com.android.shell";
 
     String packageName;
+    String label;
     CardView cardView;
     ImageView iconView;
     TextView nameView;
+    ImageView syncView;
     ImageView statusView;
     TextView descriptionView;
     TextView inactiveView;
@@ -58,6 +59,14 @@ public class AppsItemViewHolder extends RecyclerView.ViewHolder implements View.
         } else if (mFragment.getActivity().getPackageManager().getLaunchIntentForPackage(packageName) != null) {
             menu.add(Menu.NONE, R.string.context_menu_open, Menu.NONE, R.string.context_menu_open);
         }
+        BreventActivity activity = (BreventActivity) mFragment.getActivity();
+        if (activity.isBrevent(packageName)) {
+            if (activity.isPriority(packageName)) {
+                menu.add(Menu.NONE, R.string.context_menu_unset_priority, Menu.NONE, R.string.context_menu_unset_priority);
+            } else {
+                menu.add(Menu.NONE, R.string.context_menu_set_priority, Menu.NONE, R.string.context_menu_set_priority);
+            }
+        }
         int size = menu.size();
         for (int i = 0; i < size; ++i) {
             menu.getItem(i).setOnMenuItemClickListener(this);
@@ -66,6 +75,7 @@ public class AppsItemViewHolder extends RecyclerView.ViewHolder implements View.
 
     @Override
     public boolean onMenuItemClick(MenuItem item) {
+        BreventActivity activity = (BreventActivity) mFragment.getActivity();
         switch (item.getItemId()) {
             case R.string.context_menu_app_info:
                 openAppInfo(packageName);
@@ -80,11 +90,16 @@ public class AppsItemViewHolder extends RecyclerView.ViewHolder implements View.
                 copy(packageName);
                 break;
             case R.string.context_menu_open:
-                Activity activity = mFragment.getActivity();
                 Intent intent = activity.getPackageManager().getLaunchIntentForPackage(packageName);
                 if (intent != null) {
                     activity.startActivity(intent);
                 }
+                break;
+            case R.string.context_menu_set_priority:
+                activity.updatePriority(packageName, true);
+                break;
+            case R.string.context_menu_unset_priority:
+                activity.updatePriority(packageName, false);
                 break;
             default:
                 break;
